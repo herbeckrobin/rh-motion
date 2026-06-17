@@ -21,6 +21,7 @@ final class MotionGroup implements GroupInterface
 
     public const FIELD_ENABLED = 'enabled';
     public const FIELD_SCROLL_EFFECTS = 'scroll_effects';
+    public const FIELD_ALL_BLOCKS = 'all_blocks';
 
     public function id(): string
     {
@@ -60,6 +61,14 @@ final class MotionGroup implements GroupInterface
                 description: __('Erlaubt die scroll-gekoppelten Effekte (Drehen, Parallax). Diese wirken kräftiger. Aus = nur Reveals und Loops.', 'rh-motion'),
                 default: true,
                 keywords: ['scroll', 'parallax', 'rotate', 'drehen'],
+            ),
+            new SettingField(
+                id: self::FIELD_ALL_BLOCKS,
+                type: SettingField::TYPE_BOOLEAN,
+                label: __('Auf allen Blöcken', 'rh-motion'),
+                description: __('An (Standard) = die Animations-Auswahl erscheint an jedem Block, auch Theme- und Custom-Blöcken. Aus = nur der kuratierte Satz gängiger Core-Blöcke, falls du die Auswahl bewusst eingrenzen willst.', 'rh-motion'),
+                default: true,
+                keywords: ['custom', 'theme', 'bloecke', 'alle', 'whitelist'],
             ),
         ];
     }

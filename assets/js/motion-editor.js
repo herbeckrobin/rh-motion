@@ -28,17 +28,23 @@
 	var __ = (wp.i18n && wp.i18n.__) ? wp.i18n.__ : function (s) { return s; };
 
 	var BLOCKS = config.blocks;
+	var ALL_BLOCKS = !!config.allBlocks;
 	var ATTR_REVEAL = config.attrReveal;
 	var ATTR_LOOP = config.attrLoop;
 	var REVEAL_OPTIONS = config.reveal || [];
 	var LOOP_OPTIONS = config.loop || [];
+
+	// Greift die Animation für diesen Block? Mit allBlocks jeder Block, sonst die Whitelist.
+	function isAllowed(name) {
+		return !!name && (ALL_BLOCKS || BLOCKS.indexOf(name) !== -1);
+	}
 
 	// 1. Attribute an allen erlaubten Blöcken anhängen.
 	addFilter(
 		'blocks.registerBlockType',
 		'rh-motion/add-attributes',
 		function (settings, name) {
-			if (BLOCKS.indexOf(name) === -1) {
+			if (!isAllowed(name)) {
 				return settings;
 			}
 			var added = {};
@@ -53,7 +59,7 @@
 	var withMotionPanel = createHigherOrderComponent(
 		function (BlockEdit) {
 			return function (props) {
-				if (BLOCKS.indexOf(props.name) === -1) {
+				if (!isAllowed(props.name)) {
 					return el(BlockEdit, props);
 				}
 				var attrs = props.attributes || {};

@@ -26,6 +26,17 @@ final class Motion
     public const ATTR_REVEAL = 'rhmReveal';
     public const ATTR_LOOP = 'rhmLoop';
 
+    /**
+     * Alt-Werte-Aliase für sanfte Migrationen (z.B. aus Theme-Reveal-Systemen).
+     * Gemappt auf den kanonischen rh-motion-Wert vor dem Whitelist-Check.
+     *
+     * @var array<string, string>
+     */
+    private const REVEAL_ALIASES = [
+        'zoom' => 'expand',
+        'slide-up' => 'fly-up',
+    ];
+
     public function boot(): void
     {
         if (! $this->enabled()) {
@@ -46,6 +57,24 @@ final class Motion
     private function scrollEffectsAllowed(): bool
     {
         return (bool) rhbp_setting(MotionGroup::GROUP_ID, MotionGroup::FIELD_SCROLL_EFFECTS, true);
+    }
+
+    private function allBlocksAllowed(): bool
+    {
+        return (bool) rhbp_setting(MotionGroup::GROUP_ID, MotionGroup::FIELD_ALL_BLOCKS, true);
+    }
+
+    /**
+     * Greift die Animation für diesen Block? Mit dem All-Blocks-Schalter jeder
+     * Block, sonst nur die Core-Whitelist.
+     */
+    private function matchesBlock(string $blockName): bool
+    {
+        if ($blockName === '') {
+            return false;
+        }
+
+        return $this->allBlocksAllowed() || in_array($blockName, $this->blocks(), true);
     }
 
     /**
@@ -135,12 +164,16 @@ final class Motion
         }
 
         $blockName = $block['blockName'] ?? '';
-        if (! in_array($blockName, $this->blocks(), true)) {
+        if (! is_string($blockName) || ! $this->matchesBlock($blockName)) {
             return $blockContent;
         }
 
         $reveal = $block['attrs'][self::ATTR_REVEAL] ?? '';
         $loop = $block['attrs'][self::ATTR_LOOP] ?? '';
+
+        if (is_string($reveal) && isset(self::REVEAL_ALIASES[$reveal])) {
+            $reveal = self::REVEAL_ALIASES[$reveal];
+        }
 
         $attrs = '';
         if (is_string($reveal) && $reveal !== '' && array_key_exists($reveal, $this->revealOptions())) {
@@ -214,6 +247,7 @@ final class Motion
 
         wp_localize_script('rh-motion-editor', 'rhMotionConfig', [
             'blocks' => array_values($this->blocks()),
+            'allBlocks' => $this->allBlocksAllowed(),
             'attrReveal' => self::ATTR_REVEAL,
             'attrLoop' => self::ATTR_LOOP,
             'reveal' => $this->toOptionList($this->revealOptions()),

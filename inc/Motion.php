@@ -43,6 +43,7 @@ final class Motion
             return;
         }
 
+        add_filter('register_block_type_args', [$this, 'registerBlockAttributes'], 10, 2);
         add_filter('render_block', [$this, 'addDataAttributes'], 10, 2);
         add_action('wp_head', [$this, 'renderReadyMarker'], 1);
         add_action('wp_enqueue_scripts', [$this, 'enqueueFrontend']);
@@ -152,6 +153,30 @@ final class Motion
         $filtered = (array) apply_filters('rh-blueprint/motion/loop_options', $options);
 
         return $filtered;
+    }
+
+    /**
+     * Hängt rhmReveal/rhmLoop serverseitig an die Block-Typen, die das Editor-JS
+     * clientseitig bespielt. Ohne das verwirft der block-renderer-REST-Endpoint
+     * die mitgeschickten Attribute (rest_additional_properties_forbidden, 400),
+     * SSR-Blöcke rendern dann im Editor nicht. Bedingung deckungsgleich mit
+     * matchesBlock(), damit Editor und Server dieselbe Block-Menge bespielen.
+     *
+     * @param array<string, mixed> $args
+     * @return array<string, mixed>
+     */
+    public function registerBlockAttributes(array $args, string $blockName): array
+    {
+        if (! $this->matchesBlock($blockName)) {
+            return $args;
+        }
+
+        $attributes = isset($args['attributes']) && is_array($args['attributes']) ? $args['attributes'] : [];
+        $attributes[self::ATTR_REVEAL] = ['type' => 'string', 'default' => ''];
+        $attributes[self::ATTR_LOOP] = ['type' => 'string', 'default' => ''];
+        $args['attributes'] = $attributes;
+
+        return $args;
     }
 
     /**

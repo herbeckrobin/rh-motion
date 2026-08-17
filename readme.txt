@@ -4,7 +4,7 @@ Tags: animation, scroll, reveal, motion, gutenberg
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.2.3
+Stable tag: 0.2.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -28,6 +28,9 @@ The block whitelist and the animation set are extensible via PHP filters (rh-blu
 Part of the rh-blueprint collection. Settings live under RH Blueprint > Animationen.
 
 == Changelog ==
+
+= 0.2.4 =
+* Fix: bundle core 2.6.1. The 2.6.0 release bundled an incomplete core.
 
 = 0.2.3 =
 * Internal: shared building blocks from core 2.6.0. The update check no longer loads on regular front-end requests.
